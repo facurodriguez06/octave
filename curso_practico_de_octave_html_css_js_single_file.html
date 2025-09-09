@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Curso práctico de Octave • Integración, Derivación y EDO (HTML/CSS/JS)</title>
+  <style>
+    :root{
+      --bg:#0f1220; --panel:#121631; --ink:#e8ecff; --muted:#a9b3d6; --brand:#7aa2ff; --accent:#7ef7d3;
+      --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --code:#1b2147; --kbd:#0e132e; --border:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 800px at 70% -10%,#1a1f47 0%, transparent 60%), var(--bg);
+      color:var(--ink);font:500 16px/1.5 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Ubuntu,Arial}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(15,18,32,.7);backdrop-filter:blur(8px);z-index:30;border-bottom:1px solid var(--border)}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 20px}
+    .title{display:flex;gap:14px;align-items:center}
+    .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#9b8bff 40%, #f7aef8);box-shadow:0 0 0 1px var(--border) inset}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted);font-size:14px}
+
+    main{padding:26px 20px}
+    .grid{display:grid;grid-template-columns: 280px 1fr;gap:24px;max-width:1100px;margin:0 auto}
+    nav{position:sticky;top:64px;max-height:calc(100dvh - 80px);overflow:auto;padding-right:8px}
+    nav .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px}
+    nav a{display:block;padding:8px 10px;border-radius:10px;color:var(--muted)}
+    nav a:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+
+    section.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px}
+    h2{font-size:22px;margin:0 0 6px}
+    h3{font-size:17px;margin:16px 0 8px}
+    p{margin:10px 0}
+    ul{margin:8px 0 10px 18px}
+
+    .pill{display:inline-flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);background:rgba(255,255,255,.04);padding:6px 9px;border-radius:999px;border:1px solid var(--border)}
+
+    .code{position:relative;background:var(--code);border:1px solid var(--border);border-radius:12px;margin:12px 0}
+    .code pre{margin:0;padding:14px;overflow:auto;white-space:pre}
+    .code header{all:unset;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);border-radius:12px 12px 0 0}
+    .label{font:600 12px/1 Inter;color:var(--muted)}
+    .btns{display:flex;gap:8px}
+    .btn{border:1px solid var(--border);color:var(--ink);background:rgba(255,255,255,.04);padding:6px 10px;border-radius:9px;font:600 12px/1 Inter;cursor:pointer}
+    .btn:hover{background:rgba(255,255,255,.07)}
+
+    details{border:1px dashed var(--border);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.03);margin:12px 0}
+    details > summary{cursor:pointer;font-weight:700}
+
+    .note{font-size:14px;color:var(--muted)}
+    .badge{display:inline-grid;place-items:center;font-weight:700;font-size:11px;border-radius:8px;padding:4px 8px;margin-left:6px}
+    .ok{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.35)}
+    .warn{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.35)}
+    .err{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.35)}
+
+    .task{border-left:3px solid var(--brand);padding-left:12px;margin:12px 0}
+    .kbd{background:var(--kbd);padding:2px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:6px;font-family:ui-monospace,Consolas,monospace}
+
+    footer{color:var(--muted);text-align:center;padding:30px 16px}
+
+    /* Small */
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+      nav{position:static;max-height:none;padding-right:0}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap title">
+      <div class="logo" aria-hidden></div>
+      <div>
+        <h1>Curso práctico de GNU/Octave – HTML/CSS/JS</h1>
+        <div class="subtitle">Integración, derivación y EDO (Euler y RK4) con ejercicios, código listo para copiar y desafíos</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <nav>
+        <div class="card">
+          <strong style="display:block;margin-bottom:8px">Contenido</strong>
+          <a href="#intro">0. Cómo usar este curso</a>
+          <a href="#octave">1. Primeros pasos en Octave</a>
+          <a href="#integracion">2. Integración numérica</a>
+          <a href="#derivacion">3. Derivación numérica</a>
+          <a href="#edo">4. Ecuaciones Diferenciales (Euler & RK4)</a>
+          <a href="#minimos">5. Aproximación (Mínimos Cuadrados)</a>
+          <a href="#descargas">6. Descarga de scripts .m</a>
+        </div>
+      </nav>
+
+      <div>
+        <!-- 0. INTRO -->
+        <section id="intro" class="card">
+          <h2>0) Cómo usar este curso</h2>
+          <p>Todo el material práctico está aquí, en un único archivo HTML. Copiá y pegá cada bloque en Octave o usá los botones <span class="kbd">Copiar</span> / <span class="kbd">.m</span> para descargar el script correspondiente.</p>
+          <p class="note">Tip: en Octave GUI abrí la pestaña <em>Editor</em>, pegá el código, guardá como <code>.m</code> y ejecutá con el botón <em>Run</em> o desde la consola con <code>nombre_script</code>.</p>
+          <span class="pill">Requisitos: Octave ≥ 6.x • nociones básicas de vectores y funciones</span>
+        </section>
+
+        <!-- 1. OCTAVE BASICS -->
+        <section id="octave" class="card">
+          <h2>1) Primeros pasos en Octave</h2>
+          <p>Vectores, funciones anónimas y gráficos 2D rápidos.</p>
+          <div class="code" data-filename="basicos_octave.m">
+            <header>
+              <span class="label">Octave • Vectores + plot</span>
+              <div class="btns">
+                <button class="btn" data-action="copy">Copiar</button>
+                <button class="btn" data-action="download">.m</button>
+              </div>
+            </header>
+<pre><code>% --- Básicos de Octave: vectores y gráficos ---
+% Vector tiempo y función seno
+ t = 0:0.1:2;    % de 0 a 2 con paso 0.1
+ y = sin(pi*t);
+
+ figure(1); clf;  % nueva figura
+ plot(t,y,'-o'); grid on;
+ xlabel('t'); ylabel('y = sin(\pi t)');
+ title('Función seno discretizada');
+
+% Desafío: reemplazá por cos(2*pi*t), agregá legend y cambiá el paso.
+</code></pre>
+          </div>
+          <div class="task">
+            <strong>Desafío</strong>: creá un segundo gráfico con <code>cos(2*pi*t)</code> en la misma figura usando <code>hold on</code> y compará fases.
+          </div>
+        </section>
+
+        <!-- 2. INTEGRACION -->
+        <section id="integracion" class="card">
+          <h2>2) Integración numérica</h2>
+          <p>Implementamos Trapecio simple y múltiple para <code>f(t)=sin(\pi t)</code> en <code>[0,0.5]</code>. La integral exacta es <code>1/π</code>.</p>
+          <div class="code" data-filename="integracion_trapecios.m">
+            <header>
+              <span class="label">Octave • Trapecio simple y múltiple</span>
+              <div class="btns">
+                <button class="btn" data-action="copy">Copiar</button>
+                <button class="btn" data-action="download">.m</button>
+              </div>
+            </header>
+<pre><code>% --- Integración numérica: Trapecio simple y múltiple ---
+ f = @(x) sin(pi*x);
+ a = 0; b = 0.5; I_exacta = 1/pi;
+
+ % Trapecio simple
+ I_trap = (b-a)/2 * (f(a) + f(b));
+ fprintf('Trapecio simple: %.8f | Error = %.2e\n', I_trap, abs(I_exacta - I_trap));
+
+ % Trapecios múltiples con distintos N
+ Ns = [10 20 40 80];
+ Imulti = zeros(size(Ns));
+ for i=1:numel(Ns)
+   N = Ns(i);
+   x = linspace(a,b,N+1);
+   y = f(x);
+   Imulti(i) = (b-a)/(2*N) * (y(1) + 2*sum(y(2:N)) + y(N+1));
+   fprintf('N=%3d -> Trapecios múltiples: %.8f | Error= %.2e\n', N, Imulti(i), abs(I_exacta-Imulti(i)));
+ end
+
+ % Curva de convergencia (log-log del error)
+ errs = abs(I_exacta - Imulti);
+ figure(2); clf;
+ loglog( (b-a)./Ns, errs, '-o'); grid on;
+ xlabel('\Delta t = (b-a)/N'); ylabel('Error');
+ title('Trapecios múltiples: orden de convergencia (pendiente ~ p)');
+</code></pre>
+          </div>
+          <details><summary>Qué observar</summary>
+            <ul>
+              <li>El error cae al reducir <code>Δt</code>. Estimá la pendiente en la recta log-log.</li>
+              <li>Completá una tabla con <code>N, Δt, I, error</code> como en el práctico.</li>
+            </ul>
+          </details>
+        </section>
+
+        <!-- 3. DERIVACION -->
+        <section id="derivacion" class="card">
+          <h2>3) Derivación numérica</h2>
+          <p>Comparamos la derivada <em>adelante</em> (2 puntos) vs <em>central</em> (3 puntos) en <code>x0 = π/10</code> para <code>f(x)=sin x</code>.</p>
+          <div class="code" data-filename="derivacion_adelante_central.m">
+            <header>
+              <span class="label">Octave • Derivadas: adelante vs central</span>
+              <div class="btns">
+                <button class="btn" data-action="copy">Copiar</button>
+                <button class="btn" data-action="download">.m</button>
+              </div>
+            </header>
+<pre><code>% --- Derivación numérica: adelante (O(h)) vs central (O(h^2)) ---
+ f = @(x) sin(x); df = @(x) cos(x); x0 = pi/10;
+ hs = logspace(-5,-1,9);  % distintos pasos h
+ errA = zeros(size(hs)); errC = zeros(size(hs));
+ for k=1:numel(hs)
+   h = hs(k);
+   dA = (f(x0+h)-f(x0))/h;            % adelante
+   dC = (f(x0+h)-f(x0-h))/(2*h);      % central
+   errA(k) = abs(dA - df(x0));
+   errC(k) = abs(dC - df(x0));
+ end
+ figure(3); clf;
+ loglog(hs,errA,'-o',hs,errC,'-s'); grid on;
+ xlabel('h'); ylabel('Error absoluto');
+ legend('Adelante ~ O(h)','Central ~ O(h^2)','Location','southwest');
+ title('Derivación numérica: comparación de orden de error');
+</code></pre>
+          </div>
+          <div class="task"><strong>Desafío</strong>: repetí en <code>x0 = π/1.8</code> y compará precisión a igual <code>h</code>.</div>
+        </section>
+
+        <!-- 4. EDO -->
+        <section id="edo" class="card">
+          <h2>4) EDO de 1er orden: Euler y Runge–Kutta 4</h2>
+          <p>Resolvemos <code>u'(t) = -2u + 1</code> con <code>u(0)=0</code>. Solución exacta: <code>u(t) = 0.5(1 - e^{-2t})</code>.</p>
+
+          <div class="code" data-filename="edo_euler.m">
+            <header>
+              <span class="label">Octave • Método de Euler</span>
+              <div class="btns">
+                <button class="btn" data-action="copy">Copiar</button>
+                <button class="btn" data-action="download">.m</button>
+              </div>
+            </header>
+<pre><code>% --- EDO por Euler explícito ---
+ f = @(t,u) -2*u + 1; u0 = 0; h = 0.1; T = 2;
+ N = round(T/h); t = 0:h:T; u = zeros(1,N+1); u(1) = u0;
+ for k=1:N
+   u(k+1) = u(k) + h*f(t(k),u(k));
+ end
+ uex = 0.5*(1-exp(-2*t));
+ figure(4); clf;
+ plot(t,uex,'k-', t,u,'-o'); grid on; xlabel('t'); ylabel('u(t)');
+ legend('Exacta','Euler','Location','southeast');
+ title('EDO: u''=-2u+1 • Euler');
+ fprintf('Error max Euler (h=%.3f): %.2e\n', h, max(abs(uex - u)));
+</code></pre>
+          </div>
+
+          <div class="code" data-filename="edo_rk4.m">
+            <header>
+              <span class="label">Octave • Runge–Kutta de 4to orden (RK4)</span>
+              <div class="btns">
+                <button class="btn" data-action="copy">Copiar</button>
+                <button class="btn" data-action="download">.m</button>
+              </div>
+            </header>
+<pre><code>% --- EDO por RK4 ---
+ f = @(t,u) -2*u + 1; u0 = 0; h = 0.1; T = 2;
+ N = round(T/h); t = 0:h:T; u = zeros(1,N+1); u(1) = u0;
+ for k=1:N
+   k1 = h*f(t(k),u(k));
+   k2 = h*f(t(k)+h/2, u(k)+k1/2);
+   k3 = h*f(t(k)+h/2, u(k)+k2/2);
+   k4 = h*f(t(k)+h,   u(k)+k3);
+   u(k+1) = u(k) + (k1 + 2*k2 + 2*k3 + k4)/6;
+ end
+ uex = 0.5*(1-exp(-2*t));
+ figure(5); clf;
+ plot(t,uex,'k-', t,u,'-s'); grid on; xlabel('t'); ylabel('u(t)');
+ legend('Exacta','RK4','Location','southeast');
+ title('EDO: u''=-2u+1 • RK4');
+ fprintf('Error max RK4 (h=%.3f): %.2e\n', h, max(abs(uex - u)));
+</code></pre>
+          </div>
+          <div class="task"><strong>Desafío</strong>: compará error máximo para varios <code>h</code> y estimá el orden de convergencia de Euler vs RK4.
+          </div>
+        </section>
+
+        <!-- 5. MINIMOS CUADRADOS -->
+        <section id="minimos" class="card">
+          <h2>5) Aproximación por mínimos cuadrados (recta)</h2>
+          <p>Ajustamos una recta <code>y = a x + b</code> a datos experimentales y graficamos residuales.</p>
+          <div class="code" data-filename="minimos_recta.m">
+            <header>
+              <span class="label">Octave • Mínimos cuadrados (recta)</span>
+              <div class="btns">
+                <button class="btn" data-action="copy">Copiar</button>
+                <button class="btn" data-action="download">.m</button>
+              </div>
+            </header>
+<pre><code>% --- Mínimos cuadrados: ajuste lineal y residuales ---
+ x = [0 1 2 3 4];
+ y = [1.2 2.8 3.6 5.1 7.2];
+ X = [x(:) ones(numel(x),1)];           % matriz de diseño [x 1]
+ theta = X\y(:);                         % solución LS: [a; b]
+ a = theta(1); b = theta(2);
+ yhat = a*x + b; r = y - yhat;           % predicción y residuales
+
+ figure(6); clf;
+ subplot(2,1,1);
+ plot(x,y,'o', x,yhat,'-'); grid on; legend('Datos','Ajuste');
+ title(sprintf('Ajuste lineal: y = %.3f x + %.3f', a, b));
+ subplot(2,1,2);
+ stem(x,r,'filled'); grid on; xlabel('x'); ylabel('Residuo');
+ title('Residuales');
+</code></pre>
+          </div>
+          <div class="task"><strong>Desafío</strong>: probá un ajuste cuadrático usando <code>X = [x(:).^2 x(:) ones(n,1)]</code> y compará residuales.</div>
+        </section>
+
+        <!-- 6. DESCARGAS RAPIDAS -->
+        <section id="descargas" class="card">
+          <h2>6) Descarga rápida de todos los scripts</h2>
+          <p>Hacé clic para generar y bajar un ZIP con todos los <code>.m</code> listos:</p>
+          <button class="btn" id="zipAll">Descargar ZIP</button>
+          <span class="badge ok">offline</span>
+          <p class="note">El ZIP se arma en tu navegador. No se sube nada a ninguna parte.</p>
+        </section>
+
+        <footer>
+          Hecho con cariño nerd. Ajustá, rompe y vuelve a armar: así aprende el cerebro.
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Utilidades
+    const bySel = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+    // Copiar código / Descargar .m
+    $$('.code').forEach(box => {
+      const pre = box.querySelector('pre');
+      const txt = pre.innerText.replace(/\n$/, '');
+      const fname = box.dataset.filename || 'script.m';
+      box.querySelector('[data-action="copy"]').addEventListener('click', async () => {
+        try{ await navigator.clipboard.writeText(txt); toast('Copiado al portapapeles','ok'); }
+        catch(e){ toast('No se pudo copiar','err'); }
+      });
+      box.querySelector('[data-action="download"]').addEventListener('click', () => {
+        downloadFile(fname, txt);
+      });
+    });
+
+    function downloadFile(name, content){
+      const blob = new Blob([content], {type:'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+    }
+
+    // ZIP offline (Zip a mano simple)
+    // Implementamos un ZIP mínimo (sin compresión) para 5 archivos.
+    // Para mantener todo autocontenido, construimos el binario ZIP manualmente.
+    // Referencia: formato ZIP: local file header + file data + central dir.
+
+    function strToUint8(str){
+      const enc = new TextEncoder();
+      return enc.encode(str);
+    }
+
+    function crc32(buf){ // CRC32 simple
+      let table = crc32.table;
+      if(!table){
+        table = new Uint32Array(256);
+        for(let i=0;i<256;i++){
+          let c=i;
+          for(let k=0;k<8;k++) c = ((c&1)?(0xEDB88320^(c>>>1)):(c>>>1));
+          table[i]=c>>>0;
+        }
+        crc32.table = table;
+      }
+      let crc = ~0;
+      for(let i=0;i<buf.length;i++) crc = table[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+      return (~crc)>>>0;
+    }
+
+    function le32(n){ const b=new Uint8Array(4); b[0]=n&255; b[1]=(n>>>8)&255; b[2]=(n>>>16)&255; b[3]=(n>>>24)&255; return b; }
+    function le16(n){ const b=new Uint8Array(2); b[0]=n&255; b[1]=(n>>>8)&255; return b; }
+
+    function buildZip(files){
+      const chunks=[]; const central=[]; let offset=0;
+      files.forEach(f=>{
+        const name = strToUint8(f.name);
+        const data = strToUint8(f.content);
+        const crc = crc32(data);
+        const sigLFH = strToUint8('\x50\x4b\x03\x04');
+        const ver = le16(20), flag=le16(0), comp=le16(0), time=le16(0), date=le16(0);
+        const CRC = le32(crc), csize=le32(data.length), usize=le32(data.length);
+        const nlen=le16(name.length), elen=le16(0);
+        const header = concat([sigLFH, ver, flag, comp, time, date, CRC, csize, usize, nlen, elen, name]);
+        chunks.push(header, data);
+        const lfhLen = header.length + data.length;
+        // Central directory
+        const sigCDH = strToUint8('\x50\x4b\x01\x02');
+        const verMade=le16(20), verNeed=le16(20), gpFlag=le16(0), compM=le16(0), timeM=le16(0), dateM=le16(0);
+        const cCRC=le32(crc), ccsize=le32(data.length), cusize=le32(data.length);
+        const fnlen=le16(name.length), exlen=le16(0), cmlen=le16(0);
+        const disk=le16(0), iattr=le16(0), eattr=le32(0);
+        const relOff=le32(offset);
+        const cd = concat([sigCDH, verMade, verNeed, gpFlag, compM, timeM, dateM, cCRC, ccsize, cusize,
+                           fnlen, exlen, cmlen, disk, iattr, eattr, relOff, name]);
+        central.push(cd);
+        offset += lfhLen;
+      });
+      const cdAll = concat(central);
+      const sigEOCD = strToUint8('\x50\x4b\x05\x06');
+      const diskNum=le16(0), diskStart=le16(0), entriesDisk=le16(files.length), entriesTot=le16(files.length);
+      const cdSize=le32(cdAll.length), cdOffset=le32(offset), cmlen=le16(0);
+      const eocd = concat([sigEOCD, diskNum, diskStart, entriesDisk, entriesTot, cdSize, cdOffset, cmlen]);
+      const zip = concat([...chunks, cdAll, eocd]);
+      return new Blob([zip], {type:'application/zip'});
+    }
+
+    function concat(arr){
+      const len = arr.reduce((s,a)=>s+a.length,0);
+      const out = new Uint8Array(len);
+      let off=0; arr.forEach(a=>{out.set(a,off); off+=a.length;});
+      return out;
+    }
+
+    bySel('#zipAll').addEventListener('click', () => {
+      const get = (sel)=>{ const el = bySel(sel); return el? el.innerText.replace(/\n$/,'') : ''; };
+      const files = [
+        {name:'basicos_octave.m', content: bySel('[data-filename="basicos_octave.m"] pre').innerText},
+        {name:'integracion_trapecios.m', content: bySel('[data-filename="integracion_trapecios.m"] pre').innerText},
+        {name:'derivacion_adelante_central.m', content: bySel('[data-filename="derivacion_adelante_central.m"] pre').innerText},
+        {name:'edo_euler.m', content: bySel('[data-filename="edo_euler.m"] pre').innerText},
+        {name:'edo_rk4.m', content: bySel('[data-filename="edo_rk4.m"] pre').innerText},
+        {name:'minimos_recta.m', content: bySel('[data-filename="minimos_recta.m"] pre').innerText},
+      ];
+      const zipBlob = buildZip(files);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = 'octave_practicas.zip';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+      toast('ZIP descargado','ok');
+    });
+
+    // Toast minimalista
+    function toast(msg, kind='ok'){
+      const t = document.createElement('div');
+      t.textContent = msg; t.className = 'toast';
+      Object.assign(t.style, {
+        position:'fixed', inset:'auto 20px 20px auto', background:'rgba(20,26,60,.95)', color:'white',
+        padding:'10px 14px', border:'1px solid var(--border)', borderRadius:'10px', zIndex:9999,
+        boxShadow:'0 10px 30px rgba(0,0,0,.25)', font:'600 13px Inter'
+      });
+      if(kind==='ok') t.style.borderColor='rgba(34,197,94,.5)';
+      if(kind==='err') t.style.borderColor='rgba(239,68,68,.5)';
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 2000);
+    }
+  </script>
+</body>
+</html>
